@@ -4,6 +4,7 @@ import time
 import os.path
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.settimeout(0.1)
 #s.close()
 host = ''
 port = 10001
@@ -60,22 +61,31 @@ if os.path.exists("/sys/class/gpio/gpio39") == False:
 	
 
 fw = file("/sys/class/gpio/gpio38/direction", "w")
-fw.write("in")
+fw.write("out")
 fw.close()
 fw = file("/sys/class/gpio/gpio39/direction", "w")
-fw.write("in")
+fw.write("out")
 fw.close()
 fw = file("/sys/class/gpio/gpio34/direction", "w")
-fw.write("in")
+fw.write("out")
 fw.close()
 fw = file("/sys/class/gpio/gpio35/direction", "w")
-fw.write("in")
+fw.write("out")
 fw.close()
+
+#msg = "I am ready to go!"
+#msgencode = msg.encode('utf-8')
+#s.sendall(msgencode)
+
 while 1:
 	data = conn.recv(1024)
 	test = data.decode('utf-8')
 	print (test)
 	sp = test.split(",")
+	print(sp[0]) #left speed
+	print(sp[1]) #left direction
+	print(sp[2]) #right speed
+	print(sp[3]) #right direction
 	m1 = sp[0]
 	s1 = float(m1)
 	MS1 = 1444000 - (1444000*s1*0.01)
@@ -85,32 +95,41 @@ while 1:
 	dr1 = sp[1]	
 
 	m2 = sp[2]
-	s2 = float[m2]
+	s2 = float(m2)
 	MS2 = 1444000 - (1444000*s2*0.01)
 	PWM2 = int(MS2)
 	strpwm2 = str(PWM2)
 
 	dr2 = sp[3]	
 
+	print("PWM 1 = ", strpwm1)
+	print(dr1)
+	print("PWM 2 = ", strpwm2)
+	print(dr2)
+
 	fw = file("/sys/class/gpio/gpio34/value", "w")
 	fw.write("dr1")
+	#fw.flush()
 	fw.close()
 
 	fw = file("/sys/class/gpio/gpio35/value", "w")
 	fw.write("dr1")
+	#fw.flush()
 	fw.close()
 	
 	fw = file("/sys/class/gpio/gpio38/value", "w")
 	fw.write("dr2")
+	#fw.flush()
 	fw.close()
 
 	fw = file("/sys/class/gpio/gpio39/value", "w")
 	fw.write("dr2")
+	#fw.flush()
 	fw.close()
 
 	fw = file("/sys/devices/ocp.2/pwm_test_P8_13.9/period", "w")
 	fw.write("1444000")
-	fw.close
+	fw.close()
 	
 	fw = file("/sys/devices/ocp.2/pwm_test_P8_13.9/duty", "w")
 	fw.write("strpwm1")
@@ -129,19 +148,26 @@ while 1:
 	fw.write("1444000")
 	fw.close()
 
-	fw = file("/sys/devices/ocp.2/pwm_test_P8_13.9/duty", "w")
+	fw = file("/sys/devices/ocp.2/pwm_test_P9_14.11/duty", "w")
 	fw.write("strpwm2")
 	fw.close()
 
-	fw = file("/sys/devices/ocp.2/pwm_test_P8_14.12/period", "w")
+	fw = file("/sys/devices/ocp.2/pwm_test_P9_16.12/period", "w")
 	fw.write("1444000")
 	fw.close()
 
-	fw = file("/sys/devices/ocp.2/pwm_test_P8_13.9/duty", "w")
+	fw = file("/sys/devices/ocp.2/pwm_test_P9_16.12/duty", "w")
 	fw.write("strpwm2")
 	fw.close()
 		
+#	if issubclass(s.timeout, s.error) == True:
+#		fw = file("/sys/devices/ocp.2/pwm_test_P9_14.11/duty", "w")
+#		fw.write("1444000")
+#		fw.close()
 
+#		fw = file("/sys/devices/ocp.2/pwm_test_P9_16.12/duty", "w")
+#		fw.write("1444000")
+#		fw.close()		
 
 	if test == "Quit":
 		s.close()
